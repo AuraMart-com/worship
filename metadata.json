@@ -1,0 +1,6 @@
+{
+  "name": "SovereignPrompter",
+  "description": "A low-light worship display, lyric karaoke synchronizer, and ambient synthesizer system designed for prayer and fasting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

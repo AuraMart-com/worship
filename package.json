@@ -1,0 +1,13 @@
+{
+  "name": "sovereign-prompter",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "mkdir -p dist && cp -r index.html style.css app.js database assets server.js firestore.rules firebase-blueprint.json dist/",
+    "lint": "echo 'No lint required'"
+  },
+  "dependencies": {}
+}

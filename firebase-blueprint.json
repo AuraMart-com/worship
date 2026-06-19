@@ -1,0 +1,88 @@
+{
+  "entities": {
+    "WorshipSong": {
+      "title": "WorshipSong",
+      "description": "Represents a worship song in the setlist with synced lyrics",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique computed slug of the song"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the worship song"
+        },
+        "artist": {
+          "type": "string",
+          "description": "The artist of the worship song"
+        },
+        "key": {
+          "type": "string",
+          "description": "Musical key of the song"
+        },
+        "tempo": {
+          "type": "number",
+          "description": "The BPM tempo of the song"
+        },
+        "audioUrl": {
+          "type": "string",
+          "description": "Firebase Storage download url for the audio file"
+        },
+        "audioFileName": {
+          "type": "string",
+          "description": "The friendly file name of the audio"
+        },
+        "isPreloaded": {
+          "type": "boolean",
+          "description": "Whether the song was seeded by default"
+        },
+        "lyrics": {
+          "type": "array",
+          "description": "Lyrics array synced with timestamps",
+          "items": {
+            "type": "object",
+            "properties": {
+              "time": {
+                "type": "number",
+                "description": "The timestamp marker in seconds"
+              },
+              "text": {
+                "type": "string",
+                "description": "The text of this lyric line"
+              }
+            }
+          }
+        },
+        "lines": {
+          "type": "array",
+          "description": "Duplicate lyrics array for performance",
+          "items": {
+            "type": "object",
+            "properties": {
+              "time": {
+                "type": "number",
+                "description": "The timestamp marker in seconds"
+              },
+              "text": {
+                "type": "string",
+                "description": "The text of this lyric line"
+              }
+            }
+          }
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "Timestamp indicating when the song was last updated"
+        }
+      },
+      "required": ["id", "title"]
+    }
+  },
+  "firestore": {
+    "worship_songs/{songId}": {
+      "schema": "WorshipSong",
+      "description": "Collection of worship songs synced across users"
+    }
+  }
+}

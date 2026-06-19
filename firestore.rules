@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Worship Songs Collection Rules
+    match /worship_songs/{songId} {
+      // Publicly viewable and manageable since the platform is designed as a collaborative, local-first hybrid prompter
+      allow read: if true;
+      allow delete: if true;
+      
+      // Enforce strict type validation and size limits on create and draft updates
+      allow create, update: if isValidWorshipSong(request.resource.data);
+    }
+  }
+
+  // Strong validation schema representing the properties of a WorshipSong with safe path/field lookup
+  function isValidWorshipSong(data) {
+    return data.get('id', '') is string 
+        && data.get('id', '').size() <= 128
+        && data.get('title', '') is string 
+        && data.get('title', '').size() <= 128
+        && (data.get('artist', null) == null || (data.get('artist', '') is string && data.get('artist', '').size() <= 128))
+        && (data.get('key', null) == null || (data.get('key', '') is string && data.get('key', '').size() <= 32))
+        && (data.get('tempo', null) == null || data.get('tempo', 0) is number)
+        && (data.get('audioUrl', null) == null || (data.get('audioUrl', '') is string && data.get('audioUrl', '').size() <= 2048))
+        && (data.get('audioFileName', null) == null || (data.get('audioFileName', '') is string && data.get('audioFileName', '').size() <= 256))
+        && (data.get('isPreloaded', null) == null || data.get('isPreloaded', false) is bool)
+        && (data.get('lyrics', null) == null || data.get('lyrics', []) is list)
+        && (data.get('lines', null) == null || data.get('lines', []) is list)
+        && (data.get('updatedAt', null) == null || data.get('updatedAt', 0) is number);
+  }
+}
+

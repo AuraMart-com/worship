@@ -1,0 +1,452 @@
+/* Dynamic SovereignPrompter Custom Stylesheet */
+/* Crafted carefully for low-light worship guidance, fasting prayers, and active synchrony */
+
+/* Custom Variables */
+:root {
+  --color-emerald-glow: rgba(16, 185, 129, 0.3);
+  --color-emerald-neon: rgba(16, 185, 129, 0.85);
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* Base body ambient backdrop and interactive grid definition */
+body {
+  font-family: var(--font-sans);
+  background-color: #09090c;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+    radial-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px);
+  background-size: 100% 100%, 24px 24px;
+  position: relative;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Elegant keyframe flow animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    text-shadow: 0 0 12px rgba(16, 185, 129, 0.4), 0 0 2px rgba(16, 185, 129, 0.2);
+    transform: scale(1);
+  }
+  50% {
+    text-shadow: 0 0 24px rgba(16, 185, 129, 0.7), 0 0 8px rgba(16, 185, 129, 0.4);
+    transform: scale(1.015);
+  }
+}
+
+@keyframes waveBackground {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes softRipple {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.2); }
+  70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Classes utilities */
+.animate-fadeIn {
+  animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Massive Glowing Active Lyric Prompter Class */
+.neon-text-glow {
+  color: #34d399;
+  font-family: var(--font-sans);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.3;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: pulseGlow 4s ease-in-out infinite;
+  background: linear-gradient(to right, #34d399, #10b981, #6ee7b7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Elegant card design hover offsets */
+.worship-card-glowing {
+  background: rgba(15, 15, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.worship-card-glowing:hover {
+  transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px 0 rgba(16, 185, 129, 0.05);
+}
+
+/* Custom interactive inputs styling */
+input[type="text"], input[type="number"], select, textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+  border-color: rgba(16, 185, 129, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  background-color: rgba(9, 9, 12, 0.9) !important;
+}
+
+/* Interactive slider range customization */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #1a1a24;
+  height: 6px;
+  border-radius: 9999px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  transition: transform 0.1s ease, background-color 0.1s ease;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: #34d399;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  transition: transform 0.1s ease, background-color 0.1s ease;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  background: #34d399;
+}
+
+/* Scrollbar minimal styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090c;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1f1f29;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
+}
+
+/* Ripple button active effect */
+.btn-ripple-active {
+  animation: softRipple 2s infinite;
+}
+
+/* Micro Editor Timeline Row states */
+.timeline-row-active {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Custom visual backdrop layout definitions */
+.ambient-glow-source {
+  background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 70%);
+}
+
+/* High contrast typography pairings for perfect layout score */
+.display-title {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.mono-indicator {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 550;
+  letter-spacing: 0.05em;
+}
+
+/* ==========================================================================
+   METEORIC FULLSCREEN IMMERSIVE CUES & PRESENTATION ENGINE
+   ========================================================================== */
+#view-player:fullscreen #player-header,
+#view-player:fullscreen #player-wave-container,
+#view-player:fullscreen #player-controls-footer,
+#view-player:-webkit-full-screen #player-header,
+#view-player:-webkit-full-screen #player-wave-container,
+#view-player:-webkit-full-screen #player-controls-footer,
+#view-player.is-fullscreen #player-header,
+#view-player.is-fullscreen #player-wave-container,
+#view-player.is-fullscreen #player-controls-footer {
+  display: none !important;
+}
+
+#view-player:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background-color: #000000 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#view-player.is-fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background-color: #000000 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 9999 !important;
+}
+
+#view-player:fullscreen #player-prompt-container,
+#view-player.is-fullscreen #player-prompt-container {
+  max-width: 90vw !important;
+  width: 90vw !important;
+}
+
+/* Make lyrics massive but balanced so they display on max 2 lines inside laptop fullscreen views */
+#view-player:fullscreen #prompt-row-active,
+#view-player.is-fullscreen #prompt-row-active {
+  font-size: 4.5vw !important;
+  line-height: 1.3 !important;
+  text-shadow: 0 0 30px rgba(16, 185, 129, 0.7) !important;
+}
+
+#view-player:fullscreen #prompt-row-prev,
+#view-player:fullscreen #prompt-row-next,
+#view-player.is-fullscreen #prompt-row-prev,
+#view-player.is-fullscreen #prompt-row-next {
+  font-size: 2.0vw !important;
+  line-height: 1.3 !important;
+}
+
+/* Support webkit full-screen triggers */
+#view-player:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background-color: #000000 !important;
+}
+
+#view-player:-webkit-full-screen #player-prompt-container {
+  max-width: 90vw !important;
+  width: 90vw !important;
+}
+
+#view-player:-webkit-full-screen #prompt-row-active {
+  font-size: 4.5vw !important;
+  line-height: 1.3 !important;
+  text-shadow: 0 0 30px rgba(16, 185, 129, 0.7) !important;
+}
+
+#view-player:-webkit-full-screen #prompt-row-prev,
+#view-player:-webkit-full-screen #prompt-row-next {
+  font-size: 2.0vw !important;
+  line-height: 1.3 !important;
+}
+
+/* ==========================================================================
+   MOBILE & TABLET VIEWPORT ENGINE OVERRIDES (@media (max-width: 768px))
+   ========================================================================== */
+@media (max-width: 768px) {
+  body {
+    background-size: 100% 100%, 18px 18px; /* Tighter mesh grid representation */
+  }
+  
+  header {
+    height: auto !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+  
+  header .max-w-7xl {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    height: auto !important;
+    align-items: center !important;
+  }
+  
+  header .max-w-7xl > div:last-child {
+    width: 100% !important;
+    justify-content: space-between !important;
+    gap: 2px !important;
+  }
+
+  #db-status-badge {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 10px !important;
+  }
+  
+  #db-status-text {
+    max-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  main {
+    padding-top: 1rem !important;
+    padding-bottom: 2.5rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  /* Compact Dashboard Banner */
+  #view-dashboard > div.bg-gradient-to-r {
+    padding: 1.25rem !important;
+    border-radius: 1.25rem !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  #view-dashboard h1 {
+    font-size: 1.85rem !important;
+    line-height: 1.25 !important;
+  }
+  
+  #view-dashboard p {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    margin-top: 0.5rem !important;
+  }
+  
+  /* Responsive grid layout */
+  .grid-cols-2 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+  }
+  
+  .grid-cols-2 > div {
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 0.75rem !important;
+  }
+  
+  /* Worship Song Cards layout optimization */
+  .worship-card-glowing {
+    padding: 1.25rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  /* Compact header details in cards */
+  .worship-card-glowing .text-lg {
+    font-size: 1rem !important;
+  }
+
+  /* Three-dots floating menu alignment for narrow screen viewports */
+  [id^="dropdown-menu-"] {
+    position: absolute;
+    bottom: auto !important;
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+    width: 13rem !important;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.85) !important;
+  }
+
+  /* Creation Wizard Optimization */
+  #wizard-phase-config {
+    gap: 1rem !important;
+  }
+  
+  #wizard-phase-config > div {
+    padding: 1.25rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  #wizard-phase-sync {
+    gap: 1rem !important;
+  }
+  
+  #wizard-phase-sync > div {
+    padding: 1.25rem !important;
+    border-radius: 1.25rem !important;
+    max-height: none !important; /* Allow stacking scrolling */
+  }
+
+  /* Active Lyrics Prompter screen on mobile device */
+  #view-player {
+    min-height: 75vh !important;
+    border-radius: 1.25rem !important;
+  }
+  
+  #view-player .px-6 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  #player-track-subtitle {
+    font-size: 9px !important;
+  }
+
+  /* Core active lyrics styling inside mobile screen */
+  #prompt-row-prev, #prompt-row-next {
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    padding: 0 0.5rem;
+  }
+  
+  #prompt-row-active {
+    font-size: 1.85rem !important;
+    line-height: 1.35 !important;
+    font-weight: 800 !important;
+    padding: 0 0.5rem;
+  }
+  
+  #view-player .min-h-\[140px\] {
+    min-height: 110px !important;
+  }
+}
