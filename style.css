@@ -199,15 +199,20 @@ input[type="range"]::-moz-range-thumb:hover {
    METEORIC FULLSCREEN IMMERSIVE CUES & PRESENTATION ENGINE
    ========================================================================== */
 #view-player:fullscreen #player-header,
-#view-player:fullscreen #player-wave-container,
 #view-player:fullscreen #player-controls-footer,
 #view-player:-webkit-full-screen #player-header,
-#view-player:-webkit-full-screen #player-wave-container,
 #view-player:-webkit-full-screen #player-controls-footer,
 #view-player.is-fullscreen #player-header,
-#view-player.is-fullscreen #player-wave-container,
 #view-player.is-fullscreen #player-controls-footer {
   display: none !important;
+}
+
+#view-player:fullscreen #player-wave-container,
+#view-player:-webkit-full-screen #player-wave-container,
+#view-player.is-fullscreen #player-wave-container {
+  display: block !important;
+  top: 1rem !important;
+  opacity: 0.6 !important;
 }
 
 #view-player:fullscreen {
@@ -450,3 +455,18 @@ input[type="range"]::-moz-range-thumb:hover {
     min-height: 110px !important;
   }
 }
+
+/* User customization for selected instrumental-label in focus mode */
+main:nth-of-type(1) > div#view-player:nth-of-type(4) > div:nth-of-type(5) > div#player-prompt-container:nth-of-type(1) > div#instrumental-visualizer:nth-of-type(3) > span#instrumental-label:nth-of-type(1) {
+  line-height: 100px;
+  font-size: 100px;
+  border-color: #fffdfd;
+  border-style: solid;
+  background-color: #000000;
+}
+
+main:nth-of-type(1) > div#view-player:nth-of-type(4) > div:nth-of-type(5) > div#player-prompt-container:nth-of-type(1) > div#instrumental-visualizer:nth-of-type(3) {
+  font-size: 50px;
+  line-height: 100px;
+}
+

@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SovereignPrompter - Worship Karaoke & Sync</title>
+  <link rel="icon" type="image/png" href="/logo.png">
   
   <!-- Premium Fonts Setup -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;550;700&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="/logo.png">
   
   <!-- Tailwind CSS Via Modern CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -49,21 +49,562 @@
   <!-- Lucide Icons Vector Library -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Link to premium external stylesheet style.css -->
-  <link rel="stylesheet" href="style.css">
+  <!-- Premium custom styles embedded directly for hyper-fast execution -->
+  <style>
+    /* Absolute First-Paint Instant Styles for the Loading Shield */
+    #loading-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #040406;
+      background-image: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      text-align: center;
+      user-select: none;
+    }
+    .loading-spinner-wrapper {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      margin-bottom: 24px;
+    }
+    .loading-spinner {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      border: 4px solid rgba(16, 185, 129, 0.1);
+      border-top-color: #10b981;
+      border-radius: 50%;
+      animation: loading-spin-kf 0.8s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+    }
+    .loading-spinner-inner {
+      box-sizing: border-box;
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      border: 3px solid rgba(52, 211, 153, 0.03);
+      border-top-color: #34d399;
+      border-radius: 50%;
+      animation: loading-spin-inner-kf 1.2s cubic-bezier(0.5, 0.2, 0.5, 0.8) infinite reverse;
+    }
+    @keyframes loading-spin-kf {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes loading-spin-inner-kf {
+      to { transform: rotate(360deg); }
+    }
+    .loading-title {
+      color: #ffffff;
+      font-size: 24px;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(to right, #ffffff, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .loading-subtitle {
+      color: #9ca3af;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    /* Dynamic SovereignPrompter Custom Stylesheet */
+    /* Crafted carefully for low-light worship guidance, fasting prayers, and active synchrony */
+
+    /* Custom Variables */
+    :root {
+      --color-emerald-glow: rgba(16, 185, 129, 0.3);
+      --color-emerald-neon: rgba(16, 185, 129, 0.85);
+      --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    /* Base body ambient backdrop and interactive grid definition */
+    body {
+      font-family: var(--font-sans);
+      background-color: #09090c;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+        radial-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px);
+      background-size: 100% 100%, 24px 24px;
+      position: relative;
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Elegant keyframe flow animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        text-shadow: 0 0 12px rgba(16, 185, 129, 0.4), 0 0 2px rgba(16, 185, 129, 0.2);
+        transform: scale(1);
+      }
+      50% {
+        text-shadow: 0 0 24px rgba(16, 185, 129, 0.7), 0 0 8px rgba(16, 185, 129, 0.4);
+        transform: scale(1.015);
+      }
+    }
+
+    @keyframes waveBackground {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes softRipple {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.2); }
+      70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Classes utilities */
+    .animate-fadeIn {
+      animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Massive Glowing Active Lyric Prompter Class */
+    .neon-text-glow {
+      color: #34d399;
+      font-family: var(--font-sans);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.3;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: pulseGlow 4s ease-in-out infinite;
+      background: linear-gradient(to right, #34d399, #10b981, #6ee7b7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Elegant card design hover offsets */
+    .worship-card-glowing {
+      background: rgba(15, 15, 20, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .worship-card-glowing:hover {
+      transform: translateY(-4px);
+      border-color: rgba(16, 185, 129, 0.25);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px 0 rgba(16, 185, 129, 0.05);
+    }
+
+    /* Custom interactive inputs styling */
+    input[type="text"], input[type="number"], select, textarea {
+      transition: all 0.2s ease-in-out;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+      border-color: rgba(16, 185, 129, 0.6) !important;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+      background-color: rgba(9, 9, 12, 0.9) !important;
+    }
+
+    /* Interactive slider range customization */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: #1a1a24;
+      height: 6px;
+      border-radius: 9999px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #10b981;
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      transition: transform 0.1s ease, background-color 0.1s ease;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      background: #34d399;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #10b981;
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      transition: transform 0.1s ease, background-color 0.1s ease;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+
+    input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.2);
+      background: #34d399;
+    }
+
+    /* Scrollbar minimal styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #09090c;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #1f1f29;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+
+    /* Ripple button active effect */
+    .btn-ripple-active {
+      animation: softRipple 2s infinite;
+    }
+
+    /* Micro Editor Timeline Row states */
+    .timeline-row-active {
+      background: rgba(16, 185, 129, 0.08) !important;
+      border-color: rgba(16, 185, 129, 0.3) !important;
+    }
+
+    /* Custom visual backdrop layout definitions */
+    .ambient-glow-source {
+      background: radial-gradient(circle at 50% 55%, rgba(16, 185, 129, 0.04) 0%, transparent 70%);
+    }
+
+    /* High contrast typography pairings for perfect layout score */
+    .display-title {
+      font-family: var(--font-sans);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .mono-indicator {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 550;
+      letter-spacing: 0.05em;
+    }
+
+    /* ==========================================================================
+       METEORIC FULLSCREEN IMMERSIVE CUES & PRESENTATION ENGINE
+       ========================================================================== */
+    #view-player:fullscreen #player-header,
+    #view-player:fullscreen #player-controls-footer,
+    #view-player:-webkit-full-screen #player-header,
+    #view-player:-webkit-full-screen #player-controls-footer,
+    #view-player.is-fullscreen #player-header,
+    #view-player.is-fullscreen #player-controls-footer {
+      display: none !important;
+    }
+
+    #view-player:fullscreen #player-wave-container,
+    #view-player:-webkit-full-screen #player-wave-container,
+    #view-player.is-fullscreen #player-wave-container {
+      display: block !important;
+      top: 1rem !important;
+      opacity: 0.6 !important;
+    }
+
+    #view-player:fullscreen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+      background-color: #000000 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    #view-player.is-fullscreen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+      background-color: #000000 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      z-index: 9999 !important;
+    }
+
+    #view-player:fullscreen #player-prompt-container,
+    #view-player.is-fullscreen #player-prompt-container {
+      max-width: 90vw !important;
+      width: 90vw !important;
+    }
+
+    /* Make lyrics massive but balanced so they display on max 2 lines inside laptop fullscreen views */
+    #view-player:fullscreen #prompt-row-active,
+    #view-player.is-fullscreen #prompt-row-active {
+      font-size: 4.5vw !important;
+      line-height: 1.3 !important;
+      text-shadow: 0 0 30px rgba(16, 185, 129, 0.7) !important;
+    }
+
+    #view-player:fullscreen #prompt-row-prev,
+    #view-player:fullscreen #prompt-row-next,
+    #view-player.is-fullscreen #prompt-row-prev,
+    #view-player.is-fullscreen #prompt-row-next {
+      font-size: 2.0vw !important;
+      line-height: 1.3 !important;
+    }
+
+    /* Support webkit full-screen triggers */
+    #view-player:-webkit-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+      background-color: #000000 !important;
+    }
+
+    #view-player:-webkit-full-screen #player-prompt-container {
+      max-width: 90vw !important;
+      width: 90vw !important;
+    }
+
+    #view-player:-webkit-full-screen #prompt-row-active {
+      font-size: 4.5vw !important;
+      line-height: 1.3 !important;
+      text-shadow: 0 0 30px rgba(16, 185, 129, 0.7) !important;
+    }
+
+    #view-player:-webkit-full-screen #prompt-row-prev,
+    #view-player:-webkit-full-screen #prompt-row-next {
+      font-size: 2.0vw !important;
+      line-height: 1.3 !important;
+    }
+
+    /* ==========================================================================
+       MOBILE & TABLET VIEWPORT ENGINE OVERRIDES (@media (max-width: 768px))
+       ========================================================================== */
+    @media (max-width: 768px) {
+      body {
+        background-size: 100% 100%, 18px 18px; /* Tighter mesh grid representation */
+      }
+      
+      header {
+        height: auto !important;
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+      }
+      
+      header .max-w-7xl {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+        height: auto !important;
+        align-items: center !important;
+      }
+      
+      header .max-w-7xl > div:last-child {
+        width: 100% !important;
+        justify-content: space-between !important;
+        gap: 2px !important;
+      }
+
+      #db-status-badge {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 10px !important;
+      }
+      
+      #db-status-text {
+        max-width: 90px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      main {
+        padding-top: 1rem !important;
+        padding-bottom: 2.5rem !important;
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+      
+      /* Compact Dashboard Banner */
+      #view-dashboard > div.bg-gradient-to-r {
+        padding: 1.25rem !important;
+        border-radius: 1.25rem !important;
+        margin-bottom: 1rem !important;
+      }
+      
+      #view-dashboard h1 {
+        font-size: 1.85rem !important;
+        line-height: 1.25 !important;
+      }
+      
+      #view-dashboard p {
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+        margin-top: 0.5rem !important;
+      }
+      
+      /* Responsive grid layout */
+      .grid-cols-2 {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.5rem !important;
+      }
+      
+      .grid-cols-2 > div {
+        padding: 0.5rem 0.75rem !important;
+        border-radius: 0.75rem !important;
+      }
+      
+      /* Worship Song Cards layout optimization */
+      .worship-card-glowing {
+        padding: 1.25rem !important;
+        border-radius: 1.25rem !important;
+      }
+
+      /* Compact header details in cards */
+      .worship-card-glowing .text-lg {
+        font-size: 1rem !important;
+      }
+
+      /* Three-dots floating menu alignment for narrow screen viewports */
+      [id^="dropdown-menu-"] {
+        position: absolute;
+        bottom: auto !important;
+        top: 100% !important;
+        left: auto !important;
+        right: 0 !important;
+        width: 13rem !important;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.85) !important;
+      }
+
+      /* Creation Wizard Optimization */
+      #wizard-phase-config {
+        gap: 1rem !important;
+      }
+      
+      #wizard-phase-config > div {
+        padding: 1.25rem !important;
+        border-radius: 1.25rem !important;
+      }
+
+      #wizard-phase-sync {
+        gap: 1rem !important;
+      }
+      
+      #wizard-phase-sync > div {
+        padding: 1.25rem !important;
+        border-radius: 1.25rem !important;
+        max-height: none !important; /* Allow stacking scrolling */
+      }
+
+      /* Active Lyrics Prompter screen on mobile device */
+      #view-player {
+        min-height: 75vh !important;
+        border-radius: 1.25rem !important;
+      }
+      
+      #view-player .px-6 {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+
+      #player-track-subtitle {
+        font-size: 9px !important;
+      }
+
+      /* Core active lyrics styling inside mobile screen */
+      #prompt-row-prev, #prompt-row-next {
+        font-size: 13px !important;
+        line-height: 1.3 !important;
+        padding: 0 0.5rem;
+      }
+      
+      #prompt-row-active {
+        font-size: 1.85rem !important;
+        line-height: 1.35 !important;
+        font-weight: 800 !important;
+        padding: 0 0.5rem;
+      }
+      
+      #view-player .min-h-\[140px\] {
+        min-height: 110px !important;
+      }
+    }
+
+    /* User customization for selected instrumental-label in focus mode */
+    main:nth-of-type(1) > div#view-player:nth-of-type(4) > div:nth-of-type(5) > div#player-prompt-container:nth-of-type(1) > div#instrumental-visualizer:nth-of-type(3) > span#instrumental-label:nth-of-type(1) {
+      line-height: 100px;
+      font-size: 100px;
+      border-color: #fffdfd;
+      border-style: solid;
+      background-color: #000000;
+    }
+
+    main:nth-of-type(1) > div#view-player:nth-of-type(4) > div:nth-of-type(5) > div#player-prompt-container:nth-of-type(1) > div#instrumental-visualizer:nth-of-type(3) {
+      font-size: 50px;
+      line-height: 100px;
+    }
+  </style>
 </head>
 <body class="bg-neutral-920 text-neutral-100 min-h-screen flex flex-col relative overflow-x-hidden selection:bg-emerald-500/20 selection:text-emerald-400">
 
   <!-- Immersive Loading Shield -->
-  <div id="loading-mask" class="fixed inset-0 bg-[#040406] z-[9999] flex flex-col items-center justify-center space-y-6 select-none pointer-events-auto">
-    <div class="relative w-16 h-16">
-      <div class="absolute inset-0 rounded-full border-4 border-emerald-500/20"></div>
-      <div class="absolute inset-0 rounded-full border-4 border-t-emerald-400 animate-spin"></div>
+  <div id="loading-mask">
+    <div class="loading-spinner-wrapper">
+      <div class="loading-spinner"></div>
+      <div class="loading-spinner-inner"></div>
     </div>
-    <div class="text-center space-y-2">
-      <h3 class="text-lg font-bold tracking-wider text-neutral-100 font-sans">SovereignPrompter</h3>
-      <p class="text-xs text-neutral-400 leading-relaxed max-w-sm">Initializing Prompter Workspace...</p>
-    </div>
+    <h3 class="loading-title">SovereignPrompter</h3>
+    <p class="loading-subtitle">Preparing Worship Sanctuary...</p>
   </div>
 
   <!-- Aesthetic background lights -->
@@ -76,8 +617,8 @@
       
       <!-- Brand Logo -->
       <div onclick="switchView('dashboard')" class="flex items-center gap-3 cursor-pointer group">
-        <div class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-all">
-          <i data-lucide="compass" class="w-5 h-5 stroke-[2.3]"></i>
+        <div class="w-10 h-10 p-1.5 bg-neutral-900 rounded-xl border border-neutral-800 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-all">
+          <img src="/logo.png" alt="SovereignPrompter" class="w-full h-full object-contain">
         </div>
         <div>
           <div class="font-black text-neutral-100 tracking-tight text-md sm:text-lg flex items-center gap-1.5 leading-none">
@@ -89,6 +630,20 @@
 
       <!-- Live Controls -->
       <div class="flex items-center gap-3">
+        <!-- Live Worship Workspace Button -->
+        <button
+          id="live-worship-btn"
+          onclick="openLiveWorshipModal()"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-extrabold text-neutral-300 hover:text-emerald-400 bg-neutral-900 border border-neutral-850 hover:border-emerald-500/20 active:scale-95 transition-all cursor-pointer shadow-lg"
+          title="Open Live Worship Sanctuary"
+        >
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span>Live Workspace</span>
+        </button>
+
         <span id="db-status-badge" class="flex items-center gap-1.5 text-xs text-neutral-400 bg-neutral-900 border border-neutral-850 px-3 py-1.5 rounded-lg font-medium">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="db-status-dot"></span>
           <span id="db-status-text" class="text-neutral-300">Sync: /database/ folder</span>
@@ -140,14 +695,11 @@
         
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 z-10 relative">
           <div>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3 tracking-wide uppercase">
-              🙏 Fasting Prayers Sanctuary
-            </span>
             <h1 class="text-3xl sm:text-4xl font-extrabold text-neutral-100 tracking-tight">
               Worship Karaoke & Prompter
             </h1>
             <p class="text-neutral-400 text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
-              Never get lost or panic during live instrumental prayers. Sing along to massive center-aligned synced lyric prompts with audio vocal assistance guidelines and procedurally synthesized pads.
+               Never get lost or panic during live instrumental prayers. Sing along to massive center-aligned synced lyric prompts with audio vocal assistance guidelines and procedurally synthesized pads.
             </p>
           </div>
 
@@ -173,7 +725,7 @@
 
       <!-- Quick Action Navigation Row -->
       <div class="flex flex-col sm:flex-row gap-4 justify-between items-center bg-neutral-950/40 p-4 border border-neutral-850 rounded-xl">
-        <div class="relative w-full sm:max-w-md">
+        <div class="relative w-full">
           <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500"></i>
           <input
             id="song-search-filter"
@@ -182,17 +734,6 @@
             placeholder="Search worship songs by title or artist..."
             class="w-full bg-neutral-910 border border-neutral-850 rounded-xl pl-11 pr-4 py-3 text-sm text-neutral-200 placeholder-neutral-600 focus:outline-none focus:border-emerald-500 transition"
           >
-        </div>
-
-        <div class="flex gap-2 w-full sm:w-auto justify-end">
-          <button
-            onclick="resetAllToDefault()"
-            class="px-4 py-2 bg-neutral-900 hover:bg-neutral-850 text-xs font-semibold text-neutral-400 border border-neutral-800 rounded-lg flex items-center gap-1.5 transition cursor-pointer"
-            title="Restore default worship configurations"
-          >
-            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-            Reset Demo Database
-          </button>
         </div>
       </div>
 
@@ -385,9 +926,31 @@
         <!-- Lyrics Block Panel -->
         <div class="lg:col-span-7 flex flex-col space-y-4">
           <div class="bg-neutral-950/40 border border-neutral-850 rounded-2xl p-6 flex flex-col h-full space-y-4">
-            <div>
-              <h3 class="text-md font-bold text-neutral-200">Lyrics Configuration</h3>
-              <p class="text-xs text-neutral-500 mt-1">Paste raw lyric lines. Blank lines are skipped. Each row becomes a separate karaoke prompt trigger.</p>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 class="text-md font-bold text-neutral-200">Lyrics Configuration</h3>
+                <p class="text-xs text-neutral-500 mt-1">Paste raw lyric lines. Blank lines are skipped. Each row becomes a separate karaoke prompt trigger.</p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onclick="cycleWizardMusicSpeed()"
+                  class="py-2 px-3 bg-neutral-900 hover:bg-neutral-850 text-emerald-400 border border-neutral-830 hover:border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                  title="Cycle Music Break Animation Speed"
+                >
+                  <i data-lucide="gauge" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span id="label-music-speed">Speed: Normal</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="insertMusicBreakShortcut()"
+                  class="shrink-0 py-2 px-3 bg-neutral-900 hover:bg-neutral-850 text-emerald-400 border border-neutral-830 hover:border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                  title="Insert 'music' at cursor"
+                >
+                  <i data-lucide="music" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span>+ Add Music Break</span>
+                </button>
+              </div>
             </div>
 
             <textarea
@@ -606,7 +1169,7 @@
     </div>
 
     <!-- ==================== SCREEN 3: PERFORMANCE PLAYER (PROMPTER FRONT-END) ==================== -->
-    <div id="view-player" class="hidden flex-col justify-between min-h-[78vh] bg-black rounded-3xl border border-neutral-900 overflow-hidden relative shadow-3xl animate-fadeIn">
+    <div id="view-player" tabindex="0" class="hidden flex-col justify-between min-h-[78vh] bg-black rounded-3xl border border-neutral-900 overflow-hidden relative shadow-3xl animate-fadeIn focus:outline-none">
       
       <!-- Backdrop ambiance glow -->
       <div class="absolute top-0 right-0 w-80 h-80 bg-emerald-500/[0.04] rounded-full blur-[100px] pointer-events-none"></div>
@@ -676,10 +1239,20 @@
           </div>
 
           <!-- Active Line: Centered, super massive, pulsing emerald green contrast -->
-          <div class="min-h-[140px] sm:min-h-[180px] flex items-center justify-center px-4 py-2">
+          <div id="lyric-text-display" class="min-h-[140px] sm:min-h-[180px] flex items-center justify-center px-4 py-2">
             <p id="prompt-row-active" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-emerald-400 tracking-tight leading-normal transition-all duration-300 filter neon-text-glow">
               Main Worship Line Active
             </p>
+          </div>
+
+          <!-- Instrumental Visualizer: Active during 'music' break slots -->
+          <div id="instrumental-visualizer" class="hidden flex items-center justify-center space-x-2 my-8 h-16 min-h-[140px] sm:min-h-[180px]">
+            <span id="instrumental-label" class="text-emerald-400 font-medium mr-4 tracking-wider animate-pulse">MUSIC ONLY</span>
+            <div class="w-2 bg-emerald-500 rounded h-12 animate-[bounce_1s_infinite_100ms]"></div>
+            <div class="w-2 bg-emerald-400 rounded h-16 animate-[bounce_1s_infinite_300ms]"></div>
+            <div class="w-2 bg-emerald-500 rounded h-8 animate-[bounce_1s_infinite_0ms]"></div>
+            <div class="w-2 bg-emerald-300 rounded h-14 animate-[bounce_1s_infinite_200ms]"></div>
+            <div class="w-2 bg-emerald-500 rounded h-10 animate-[bounce_1s_infinite_400ms]"></div>
           </div>
 
           <!-- Upcoming Line -->
@@ -922,6 +1495,139 @@
     </div>
   </div>
 
+  <!-- Live Worship Sanctuary Modal UI (Iframe Sandbox Safe, Responsive) -->
+  <div id="live-worship-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 bg-neutral-950/80 backdrop-blur-md">
+    <div class="bg-neutral-900 border border-neutral-850 rounded-3xl p-6 max-w-xl w-full space-y-5 shadow-2xl animate-in fade-in zoom-in duration-200 flex flex-col max-h-[85vh]">
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-neutral-800/60 shrink-0">
+        <div class="flex items-center gap-2.5 text-neutral-150">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <h4 class="text-sm sm:text-base font-black text-neutral-100 leading-none">Live Sanctuary</h4>
+        </div>
+        <button onclick="closeLiveWorshipModal()" class="text-neutral-500 hover:text-neutral-300 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Navigation tabs -->
+      <div class="grid grid-cols-2 gap-1.5 bg-neutral-950 p-1 rounded-xl shrink-0">
+        <button
+          id="tab-show-worships"
+          onclick="switchLiveTab('show')"
+          class="py-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer select-none bg-neutral-900 text-emerald-400 border border-neutral-800"
+        >
+          Show Current Worships
+        </button>
+        <button
+          id="tab-schedule-worship"
+          onclick="switchLiveTab('schedule')"
+          class="py-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer select-none text-neutral-400 hover:text-neutral-200"
+        >
+          Schedule a Worship
+        </button>
+      </div>
+
+      <!-- Tab panels -->
+      <div class="flex-1 overflow-y-auto pr-1 space-y-4 min-h-[260px] max-h-[50vh]">
+        <!-- TAB 1: Show list of current worship sessions -->
+        <div id="panel-show-worships" class="space-y-3">
+          <div class="text-center py-10 text-neutral-500 text-xs flex flex-col items-center gap-2" id="worships-list-empty-state">
+            <i data-lucide="calendar" class="w-8 h-8 text-neutral-705"></i>
+            <span>No ongoing or scheduled worships found.</span>
+          </div>
+          <div id="worships-list-container" class="space-y-3 hidden">
+            <!-- Dynamic Worship list cards appear here -->
+          </div>
+        </div>
+
+        <!-- TAB 2: Schedule Form -->
+        <div id="panel-schedule-worship" class="hidden space-y-4">
+          <div class="space-y-1">
+            <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Worship Session Title</label>
+            <input
+              id="schedule-title"
+              type="text"
+              placeholder="Sunday Evening Fellowship Praise"
+              class="w-full bg-neutral-950 border border-neutral-800 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-sm text-neutral-200 font-extrabold outline-none transition"
+            >
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Short Description / Focus</label>
+            <input
+              id="schedule-desc"
+              type="text"
+              placeholder="Praise cycle with synced choral timestamps"
+              class="w-full bg-neutral-950 border border-neutral-800 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-sm text-neutral-200 font-medium outline-none transition"
+            >
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Select Synced Track</label>
+              <select
+                id="schedule-song-select"
+                class="w-full bg-neutral-950 border border-neutral-800 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2 py-1.5 text-sm text-neutral-200 font-semibold outline-none transition cursor-pointer"
+              >
+                <!-- Filled dynamically with databaseSongs -->
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Start Time</label>
+              <input
+                id="schedule-time"
+                type="datetime-local"
+                class="w-full bg-neutral-950 border border-neutral-800 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2 text-sm text-neutral-200 font-mono outline-none transition cursor-pointer"
+              >
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-neutral-800/40 flex justify-end gap-3">
+            <button
+              type="button"
+              onclick="switchLiveTab('show')"
+              class="px-4 py-2 bg-neutral-950 hover:bg-neutral-850 text-neutral-400 font-bold text-xs rounded-xl border border-neutral-800 transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onclick="createNewScheduledWorship()"
+              class="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-black text-xs rounded-xl transition cursor-pointer shadow-lg shadow-emerald-500/10 flex items-center gap-1.5"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Worship Session Terminated Notification (Iframe Sandbox Safe) -->
+  <div id="worship-terminated-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center p-4 bg-neutral-950/90 backdrop-blur-md">
+    <div class="bg-neutral-900 border border-red-500/30 rounded-3xl p-8 max-w-sm w-full text-center space-y-5 shadow-2.5xl animate-in fade-in zoom-in duration-300">
+      <div class="inline-flex p-3.5 bg-red-500/10 text-red-500 rounded-full border border-red-500/20 shadow-lg">
+        <i data-lucide="alert-octagon" class="w-8 h-8"></i>
+      </div>
+      <div class="space-y-1.5">
+        <h3 class="text-base font-extrabold text-neutral-100">Worship Session Ended</h3>
+        <p class="text-xs text-neutral-400 leading-relaxed font-semibold">
+          The host has stopped or deleted this scheduled live worship event. Synchronized lyrics tracking has been ended.
+        </p>
+      </div>
+      <button
+        onclick="acknowledgeWorshipTerminated()"
+        class="w-full py-2.5 bg-neutral-950 hover:bg-neutral-850 text-neutral-200 border border-neutral-800 text-xs font-bold rounded-xl transition cursor-pointer"
+      >
+        Acknowledge
+      </button>
+    </div>
+  </div>
+
   <!-- Solid Simple Footer -->
   <footer class="border-t border-neutral-950 bg-neutral-950 text-neutral-600 py-6 text-center text-xs">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -939,7 +1645,7 @@
   <!-- Modularize script connection -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -952,7 +1658,9 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app, "ai-studio-9a362ded-7f91-41d9-b097-45bd80140103");
+    const db = initializeFirestore(app, {
+      experimentalForceLongPolling: true
+    }, "ai-studio-9a362ded-7f91-41d9-b097-45bd80140103");
     const storage = getStorage(app);
 
     // Expose Firebase as global objects in the window scope

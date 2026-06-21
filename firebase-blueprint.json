@@ -77,12 +77,80 @@
         }
       },
       "required": ["id", "title"]
+    },
+    "LiveSession": {
+      "title": "LiveSession",
+      "description": "Represents the real-time active lyric/song session synchronization",
+      "type": "object",
+      "properties": {
+        "activeSongId": {
+          "type": "string",
+          "description": "The current active song ID or null"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current player playback status: playing, paused, or idle"
+        },
+        "eventTimestamp": {
+          "type": "number",
+          "description": "The exact Date.now() millisecond clock time of the laptop action"
+        },
+        "playbackPosition": {
+          "type": "number",
+          "description": "The current position in seconds inside the audio track when the event happened"
+        }
+      },
+      "required": ["status", "eventTimestamp", "playbackPosition"]
+    },
+    "ScheduledWorship": {
+      "title": "ScheduledWorship",
+      "description": "Represents a scheduled worship event that clients can align with via temporal offset matching",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique document ID of the scheduled worship"
+        },
+        "title": {
+          "type": "string",
+          "description": "The name or title of the worship session"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief description of the worship context"
+        },
+        "songId": {
+          "type": "string",
+          "description": "Reference to the song selection tag"
+        },
+        "startTime": {
+          "type": "number",
+          "description": "The exact millisecond epoch clock timestamp when this session begins"
+        },
+        "hostId": {
+          "type": "string",
+          "description": "Identifies the browser/host that created the worship to permit deletion"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Local server/host creation timestamp"
+        }
+      },
+      "required": ["title", "songId", "startTime", "hostId", "createdAt"]
     }
   },
   "firestore": {
     "worship_songs/{songId}": {
       "schema": "WorshipSong",
       "description": "Collection of worship songs synced across users"
+    },
+    "system/live_session": {
+      "schema": "LiveSession",
+      "description": "The singleton live session broadcast info"
+    },
+    "scheduled_worships/{worshipId}": {
+      "schema": "ScheduledWorship",
+      "description": "List of scheduled live worship sessions"
     }
   }
 }

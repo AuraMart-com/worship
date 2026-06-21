@@ -20,6 +20,18 @@ let lastSpokenLyricIndex = -1;
 let playerTickerId = null;
 let activePrompterIndex = 0;
 
+// Live Worship Sanctuary Sync variables
+let activeFollowingWorshipId = null;
+let liveWorshipsUnsubscribe = null;
+let scheduledWorshipsList = [];
+let clientWorshipSyncInterval = null;
+
+let localHostId = localStorage.getItem('worship_host_id');
+if (!localHostId) {
+  localHostId = 'host_' + Math.random().toString(36).substring(2, 9);
+  localStorage.setItem('worship_host_id', localHostId);
+}
+
 // Wizard variables
 let editingSongId = null;
 let wizardRawFile = null;
@@ -32,6 +44,7 @@ let wizardIsPlaying = false;
 let wizardCurrentTime = 0;
 let wizardDuration = 120;
 let wizardAudioTag = new Audio();
+let wizardMusicSpeed = 'normal';
 let wizardIntervalId = null;
 
 // Web Audio API Synthesizer Nodes
@@ -73,7 +86,7 @@ function initOfflineIndexedDB() {
     };
     
     request.onerror = (e) => {
-      console.error("IndexedDB initialization failed:", e.target.error);
+      console.error("IndexedDB initialization failed:", e.target.error ? (e.target.error.message || String(e.target.error)) : "");
       reject(e.target.error);
     };
   });
@@ -166,10 +179,154 @@ function parseLyricLine(textLine, defaultIdx) {
   };
 }
 
+// Shortcut function next to the "Add New Song" lyric text area
+function insertMusicBreakShortcut() {
+  const textarea = document.getElementById('form-raw-lyrics');
+  if (!textarea) return;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  const word = "music";
+  
+  const before = text.substring(0, start);
+  const after = text.substring(end);
+  
+  let insertVal = word;
+  if (start > 0 && !before.endsWith('\n')) {
+    insertVal = '\n' + insertVal;
+  }
+  if (!after.startsWith('\n')) {
+    insertVal = insertVal + '\n';
+  }
+  
+  textarea.value = before + insertVal + after;
+  textarea.focus();
+  const newCursorPos = start + insertVal.length;
+  textarea.setSelectionRange(newCursorPos, newCursorPos);
+}
+
+// Extract music keyword structure e.g. "music(clap...)"
+function getMusicBreakInfo(text) {
+  if (!text) return { isMusic: false, text: "" };
+  const trimmed = text.trim();
+  const lower = trimmed.toLowerCase();
+  
+  if (lower === "music") {
+    return { isMusic: true, text: "" };
+  }
+  
+  const match = trimmed.match(/^music\s*\(([^)]+)\)$/i);
+  if (match) {
+    return { isMusic: true, text: match[1].trim().toUpperCase() };
+  }
+  
+  if (lower.startsWith("music")) {
+    const parenMatch = trimmed.match(/\(([^)]+)\)/);
+    if (parenMatch) {
+      return { isMusic: true, text: parenMatch[1].trim().toUpperCase() };
+    }
+    const remaining = trimmed.substring(5).replace(/^[:\s\-\–\(\)]+/, '').replace(/\)$/, '').trim();
+    if (remaining) {
+      return { isMusic: true, text: remaining.toUpperCase() };
+    }
+    return { isMusic: true, text: "" };
+  }
+  
+  return { isMusic: false, text: "" };
+}
+
+// Format lyrics beautifully for view display (remove music(...) wrappers)
+function formatLyricDisplay(text, isPrevOrNext = false) {
+  if (!text) return '• • •';
+  if (text === '• • •') return '• • •';
+  const musicInfo = getMusicBreakInfo(text);
+  if (musicInfo.isMusic) {
+    if (musicInfo.text) {
+      return musicInfo.text; // e.g. "CLAP..."
+    } else {
+      return isPrevOrNext ? 'INSTRUMENTAL' : '';
+    }
+  }
+  return text;
+}
+
+function updateWizardMusicSpeedUI() {
+  const labelEl = document.getElementById('label-music-speed');
+  if (labelEl) {
+    if (wizardMusicSpeed === 'slow') {
+      labelEl.textContent = 'Speed: Slow';
+    } else if (wizardMusicSpeed === 'fast') {
+      labelEl.textContent = 'Speed: Fast';
+    } else {
+      labelEl.textContent = 'Speed: Normal';
+    }
+  }
+}
+
+function cycleWizardMusicSpeed() {
+  if (wizardMusicSpeed === 'normal') {
+    wizardMusicSpeed = 'fast';
+  } else if (wizardMusicSpeed === 'fast') {
+    wizardMusicSpeed = 'slow';
+  } else {
+    wizardMusicSpeed = 'normal';
+  }
+  updateWizardMusicSpeedUI();
+}
+
+// Audio element timeupdate event listener logic for music breaks
+function setupAudioTimeUpdateListener() {
+  const audioTag = document.getElementById('player-audio-source');
+  if (audioTag) {
+    audioTag.addEventListener('timeupdate', () => {
+      const lyrics = (playingSong && playingSong.lyrics) || [];
+      const activeLine = lyrics[activePrompterIndex];
+      const lyricTextDisplay = document.getElementById("lyric-text-display");
+      const instVisualizer = document.getElementById("instrumental-visualizer");
+      const labelEl = document.getElementById("instrumental-label");
+      if (lyricTextDisplay && instVisualizer) {
+        const musicInfo = activeLine ? getMusicBreakInfo(activeLine.text) : { isMusic: false, text: "" };
+        if (musicInfo.isMusic) {
+          lyricTextDisplay.classList.add("hidden");
+          instVisualizer.classList.remove("hidden");
+          if (labelEl) {
+            if (musicInfo.text) {
+              labelEl.textContent = musicInfo.text;
+              labelEl.classList.remove("hidden");
+            } else {
+              labelEl.textContent = "";
+              labelEl.classList.add("hidden");
+            }
+          }
+          const speed = playingSong ? (playingSong.musicSpeed || 'normal') : 'normal';
+          let animDuration = '1.0s';
+          if (speed === 'slow') animDuration = '1.8s';
+          if (speed === 'fast') animDuration = '0.5s';
+          const bars = instVisualizer.querySelectorAll("div");
+          bars.forEach(bar => {
+            bar.style.animationDuration = animDuration;
+          });
+        } else {
+          lyricTextDisplay.classList.remove("hidden");
+          instVisualizer.classList.add("hidden");
+        }
+      }
+    });
+  }
+}
+
 // Initializer
 window.onload = function() {
   loadDatabase();
   lucide.createIcons();
+  setupAudioTimeUpdateListener();
+  
+  setTimeout(() => {
+    if (typeof testFirestoreConnection === 'function') {
+      testFirestoreConnection();
+    }
+    setupScheduledWorshipsRealtimeListener();
+  }, 600);
 };
 
 const OperationType = {
@@ -182,8 +339,9 @@ const OperationType = {
 };
 
 function handleFirestoreError(error, operationType, path) {
+  const errMsg = error ? (error.message || String(error)) : "Unknown firestore error";
   const errInfo = {
-    error: error instanceof Error ? error.message : String(error),
+    error: errMsg,
     authInfo: {
       userId: null,
       email: null,
@@ -196,7 +354,7 @@ function handleFirestoreError(error, operationType, path) {
     path: path
   };
   console.error('Firestore Error Info: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  throw new Error(errMsg);
 }
 
 let unsubFirestore = null;
@@ -263,7 +421,7 @@ async function loadDatabase() {
               const dRef = window.fStore.doc(window.db, "worship_songs", s.id);
               await window.fStore.setDoc(dRef, seedPayload);
             } catch (err) {
-              console.error("Failed to seed default: ", s.id, err);
+              console.error("Failed to seed default: ", s.id, err ? (err.message || String(err)) : "");
             }
           }
           return;
@@ -277,7 +435,7 @@ async function loadDatabase() {
         await renderSongsGrid();
         hideDbErrorBanner();
       }, (error) => {
-        console.error("Firestore real-time subscription error:", error);
+        console.error("Firestore real-time subscription error:", error ? (error.message || String(error)) : "");
         showDbErrorBanner("Cloud connection error: " + error.message);
         handleFirestoreError(error, OperationType.GET, "worship_songs");
       });
@@ -346,7 +504,7 @@ async function resetAllToDefault() {
       // Re-trigger loadDatabase to perform auto seeding
       await loadDatabase();
     } catch(e) {
-      console.error(e);
+      console.error(e ? (e.message || String(e)) : "");
       alert("Reset failed: " + e.message);
     }
   }
@@ -372,6 +530,17 @@ function switchView(viewName) {
 
   // Stop any audio playing
   stopAllWorshipAudio();
+
+  if (viewName === 'player') {
+    setTimeout(() => {
+      window.focus();
+      document.body.focus();
+      const playerEl = document.getElementById('view-player');
+      if (playerEl) {
+        playerEl.focus();
+      }
+    }, 80);
+  }
 }
 
 function stopAllWorshipAudio() {
@@ -741,7 +910,7 @@ async function clearLocalCache(songId) {
       await deleteAudioFromOfflineCache(songId);
       await renderSongsGrid();
     } catch (e) {
-      console.error(e);
+      console.error(e ? (e.message || String(e)) : "");
       alert("Failed to clear cache: " + e.message);
     }
   }
@@ -779,7 +948,7 @@ async function deleteSongFromDatabase(id) {
         }
       }
     } catch (e) {
-      console.error(e);
+      console.error(e ? (e.message || String(e)) : "");
       alert("Failed to delete song: " + e.message);
     }
   }
@@ -818,6 +987,9 @@ function initNewSongWizard() {
   document.getElementById('wizard-file-status-text').textContent = 'Browse local MP3 / WAV';
   document.getElementById('wizard-file-status-text').className = 'text-[11px] text-neutral-400 block truncate';
   
+  wizardMusicSpeed = 'normal';
+  updateWizardMusicSpeedUI();
+  
   toggleWizardAudioSource(true);
   switchView('wizard');
   switchOffsetWorkspace(false); // config phase first
@@ -835,6 +1007,9 @@ function loadSongIntoWizard(id) {
   document.getElementById('form-song-key').value = song.key || 'G Major';
   document.getElementById('form-song-tempo').value = song.tempo || 72;
   document.getElementById('form-song-audio-path').value = song.audioUrl || '';
+  
+  wizardMusicSpeed = song.musicSpeed || 'normal';
+  updateWizardMusicSpeedUI();
   
   // Extract raw text lines
   const songLyrics = song.lyrics || song.lines || [];
@@ -1343,6 +1518,13 @@ window.addEventListener('keydown', (e) => {
     return;
   }
 
+  if (activeFollowingWorshipId) {
+    if (e.code === 'Space' || e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      return;
+    }
+  }
+
   const syncViewActive = document.getElementById('view-wizard').classList.contains('hidden') === false &&
                          document.getElementById('wizard-phase-sync').classList.contains('hidden') === false;
                          
@@ -1438,6 +1620,7 @@ async function saveWorshipTrackToDatabase() {
       isPreloaded: false,
       lyrics: sortedLyrics,
       lines: sortedLyrics,
+      musicSpeed: wizardMusicSpeed,
       updatedAt: Date.now()
     };
 
@@ -1480,12 +1663,12 @@ async function saveWorshipTrackToDatabase() {
           handleFirestoreError(err, OperationType.WRITE, `worship_songs/${docId}`);
         }
       } catch (err) {
-        console.error("Firestore background sync failed:", err);
+        console.error("Firestore background sync failed:", err ? (err.message || String(err)) : "");
       }
     })();
 
   } catch (error) {
-    console.error("Save failed:", error);
+    console.error("Save failed:", error ? (error.message || String(error)) : "");
     alert("Worship Saved failed: " + error.message);
   } finally {
     if (saveBtn) {
@@ -1500,6 +1683,7 @@ async function startPerformanceSession(id) {
   const song = databaseSongs.find(s => s.id === id);
   if (!song) return;
 
+  const songLyrics = song.lyrics || [];
   playingSong = song;
   playerIsPlaying = false;
   playerCurrentTime = 0;
@@ -1558,6 +1742,8 @@ async function startPerformanceSession(id) {
   // Make vocal assist muted by default on starting performance
   playerVocalAssist = true;
   togglePlayerVocalAssist(); // Sets it to false and configures MUTED class and label
+
+  lastBroadcastedIndex = -1;
 }
 
 function togglePlayerVocalAssist() {
@@ -1647,11 +1833,15 @@ document.addEventListener('mozfullscreenchange', handleFullscreenChange);
 document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
 function stopPerformanceSession() {
+  if (activeFollowingWorshipId) {
+    stopActiveWorshipFollowing();
+  }
   stopAllWorshipAudio();
   switchView('dashboard');
 }
 
 function togglePerformancePlayback() {
+  if (activeFollowingWorshipId) return;
   const btn = document.getElementById('player-play-giant');
   const audioTag = document.getElementById('player-audio-source');
 
@@ -1773,16 +1963,49 @@ function updatePrompterTextUI() {
     nextLine = activePrompterIndex < lyrics.length - 1 ? lyrics[activePrompterIndex + 1].text : '• • •';
   }
 
-  if (prevEl) prevEl.textContent = prevLine || '• • •';
+  if (prevEl) prevEl.textContent = formatLyricDisplay(prevLine, true);
   
-  activeEl.textContent = activeLine || '[Get ready]';
+  activeEl.textContent = formatLyricDisplay(activeLine, false) || '[Get ready]';
   if (activeLine.startsWith('[')) {
     activeEl.className = "text-xl sm:text-2xl md:text-3.5xl font-bold tracking-normal italic text-neutral-500 filter drop-shadow-none transition duration-150";
   } else {
     activeEl.className = "text-3xl sm:text-4xl md:text-5xl lg:text-6.5xl font-black text-emerald-400 tracking-tight leading-normal filter neon-text-glow transition duration-150 transform scale-102";
   }
 
-  if (nextEl) nextEl.textContent = nextLine || '• • •';
+  if (nextEl) nextEl.textContent = formatLyricDisplay(nextLine, true);
+
+  // Toggle Instrumental visualizer for "music" break slots
+  const activeLineObj = lyrics[activePrompterIndex];
+  const displayEl = document.getElementById("lyric-text-display");
+  const vizEl = document.getElementById("instrumental-visualizer");
+  const labelEl = document.getElementById("instrumental-label");
+  if (displayEl && vizEl) {
+    const musicInfo = activeLineObj ? getMusicBreakInfo(activeLineObj.text) : { isMusic: false, text: "" };
+    if (musicInfo.isMusic) {
+      displayEl.classList.add("hidden");
+      vizEl.classList.remove("hidden");
+      if (labelEl) {
+        if (musicInfo.text) {
+          labelEl.textContent = musicInfo.text;
+          labelEl.classList.remove("hidden");
+        } else {
+          labelEl.textContent = "";
+          labelEl.classList.add("hidden");
+        }
+      }
+      const speed = playingSong ? (playingSong.musicSpeed || 'normal') : 'normal';
+      let animDuration = '1.0s';
+      if (speed === 'slow') animDuration = '1.8s';
+      if (speed === 'fast') animDuration = '0.5s';
+      const bars = vizEl.querySelectorAll("div");
+      bars.forEach(bar => {
+        bar.style.animationDuration = animDuration;
+      });
+    } else {
+      displayEl.classList.remove("hidden");
+      vizEl.classList.add("hidden");
+    }
+  }
 }
 
 function triggerNeuralVocalGuideAssistant() {
@@ -1821,6 +2044,7 @@ function speakSpeechUtteranceWord(text) {
 }
 
 function seekPlayerTimeTo(val) {
+  if (activeFollowingWorshipId) return;
   const parsed = parseFloat(val);
   playerCurrentTime = parsed;
   
@@ -1881,6 +2105,7 @@ function setPlayerAudioVolumeLevel(v) {
 }
 
 function goToPrevPlayerLyricRow() {
+  if (activeFollowingWorshipId) return;
   if (activePrompterIndex > 0) {
     const prevTime = playingSong.lyrics[activePrompterIndex - 1].time;
     seekPlayerTimeTo(prevTime);
@@ -1888,6 +2113,7 @@ function goToPrevPlayerLyricRow() {
 }
 
 function goToNextPlayerLyricRow() {
+  if (activeFollowingWorshipId) return;
   if (activePrompterIndex < playingSong.lyrics.length - 1) {
     const nextTime = playingSong.lyrics[activePrompterIndex + 1].time;
     seekPlayerTimeTo(nextTime);
@@ -2122,7 +2348,501 @@ function closeCustomConfirm(confirmed) {
   }
 }
 
+// ==================== REAL-TIME MULTI-DEVICE SYNC ENGINE ====================
+
+function openLiveWorshipModal() {
+  const modal = document.getElementById('live-worship-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  // Populate dynamic select track options
+  const select = document.getElementById('schedule-song-select');
+  if (select) {
+    select.innerHTML = databaseSongs.map(s => `<option value="${s.id}">${escapeHtml(s.title)} (${escapeHtml(s.artist || 'Unknown')})</option>`).join('');
+  }
+
+  // Pre-fill local date time
+  const timeInput = document.getElementById('schedule-time');
+  if (timeInput) {
+    const localNow = new Date();
+    localNow.setMinutes(localNow.getMinutes() - localNow.getTimezoneOffset());
+    timeInput.value = localNow.toISOString().slice(0, 16);
+  }
+
+  // Start snapshot listener if not already alive
+  setupScheduledWorshipsRealtimeListener();
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function closeLiveWorshipModal() {
+  const modal = document.getElementById('live-worship-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function switchLiveTab(tabName) {
+  const tabShow = document.getElementById('tab-show-worships');
+  const tabSchedule = document.getElementById('tab-schedule-worship');
+  const panelShow = document.getElementById('panel-show-worships');
+  const panelSchedule = document.getElementById('panel-schedule-worship');
+
+  if (tabName === 'show') {
+    if (tabShow) tabShow.className = "py-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer select-none bg-neutral-900 text-emerald-400 border border-neutral-800";
+    if (tabSchedule) tabSchedule.className = "py-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer select-none text-neutral-400 hover:text-neutral-200";
+    if (panelShow) panelShow.classList.remove('hidden');
+    if (panelSchedule) panelSchedule.classList.add('hidden');
+  } else {
+    if (tabShow) tabShow.className = "py-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer select-none text-neutral-400 hover:text-neutral-200";
+    if (tabSchedule) tabSchedule.className = "py-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer select-none bg-neutral-900 text-emerald-400 border border-neutral-800";
+    if (panelShow) panelShow.classList.add('hidden');
+    if (panelSchedule) panelSchedule.classList.remove('hidden');
+  }
+}
+
+async function createNewScheduledWorship() {
+  const titleInput = document.getElementById('schedule-title');
+  const descInput = document.getElementById('schedule-desc');
+  const songSelect = document.getElementById('schedule-song-select');
+  const timeInput = document.getElementById('schedule-time');
+
+  if (!titleInput || !timeInput || !songSelect) return;
+
+  const titleVal = titleInput.value.trim();
+  const descVal = descInput ? descInput.value.trim() : '';
+  const songIdVal = songSelect.value;
+  const timeVal = timeInput.value;
+
+  if (!titleVal) {
+    alert("Please provide a title for the scheduled worship session.");
+    return;
+  }
+  if (!timeVal) {
+    alert("Please specify a planned start time.");
+    return;
+  }
+
+  const startTimeMs = new Date(timeVal).getTime();
+  if (isNaN(startTimeMs)) {
+    alert("Invalid date or time format.");
+    return;
+  }
+
+  if (!window.db || !window.fStore) {
+    alert("Firestore is currently offline or uninitialized.");
+    return;
+  }
+
+  const randomId = 'worship_' + Math.random().toString(36).substring(2, 11);
+  const docRef = window.fStore.doc(window.db, "scheduled_worships", randomId);
+
+  const payload = {
+    title: titleVal,
+    description: descVal || 'Virtual Sanctuary Worship Gathering',
+    songId: songIdVal,
+    startTime: startTimeMs,
+    hostId: localHostId,
+    createdAt: Date.now()
+  };
+
+  try {
+    await window.fStore.setDoc(docRef, payload);
+    // Clear inputs
+    titleInput.value = '';
+    if (descInput) descInput.value = '';
+    
+    // Return to show list tab
+    switchLiveTab('show');
+  } catch (err) {
+    console.error("Error creating scheduled worship:", err ? (err.message || String(err)) : "");
+    alert("Failed scheduling worship to database: " + err.message);
+  }
+}
+
+function setupScheduledWorshipsRealtimeListener() {
+  if (!window.db || !window.fStore) return;
+
+  if (liveWorshipsUnsubscribe) return; // Keep listening continuously
+
+  const collRef = window.fStore.collection(window.db, "scheduled_worships");
+  liveWorshipsUnsubscribe = window.fStore.onSnapshot(collRef, (snapshot) => {
+    scheduledWorshipsList = [];
+    snapshot.forEach(docSnap => {
+      if (docSnap.exists()) {
+        scheduledWorshipsList.push({ id: docSnap.id, ...docSnap.data() });
+      }
+    });
+
+    // Sort: earliest planned starts first
+    scheduledWorshipsList.sort((a,b) => a.startTime - b.startTime);
+
+    renderScheduledWorshipsList();
+    checkIfFollowingWorshipDeleted();
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, "scheduled_worships");
+  });
+}
+
+function checkIfFollowingWorshipDeleted() {
+  if (activeFollowingWorshipId) {
+    const stillExists = scheduledWorshipsList.some(w => w.id === activeFollowingWorshipId);
+    if (!stillExists) {
+      stopActiveWorshipFollowing();
+      showWorshipTerminatedModal();
+    }
+  }
+}
+
+function showWorshipTerminatedModal() {
+  const modal = document.getElementById('worship-terminated-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+}
+
+// Acknowledge dismiss worship end modal
+function acknowledgeWorshipTerminated() {
+  const modal = document.getElementById('worship-terminated-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function renderScheduledWorshipsList() {
+  const emptyState = document.getElementById('worships-list-empty-state');
+  const container = document.getElementById('worships-list-container');
+
+  if (!container) return;
+
+  if (scheduledWorshipsList.length === 0) {
+    if (emptyState) emptyState.classList.remove('hidden');
+    container.classList.add('hidden');
+    container.innerHTML = '';
+    return;
+  }
+
+  if (emptyState) emptyState.classList.add('hidden');
+  container.classList.remove('hidden');
+
+  let htmlStr = '';
+
+  scheduledWorshipsList.forEach(w => {
+    const associatedSong = databaseSongs.find(s => s.id === w.songId);
+    const songName = associatedSong ? associatedSong.title : 'Undefined Worship Track';
+    const artistName = associatedSong ? (associatedSong.artist || 'Congregational') : 'Sanctuary Choir';
+    const isLocalHost = (w.hostId === localHostId);
+    
+    const formattedStartTime = new Date(w.startTime).toLocaleString();
+    
+    // Determine realtime operational status
+    const msDiff = Date.now() - w.startTime;
+    const isOngoing = (msDiff >= 0);
+
+    let badgeHtml = '';
+    if (isOngoing) {
+      badgeHtml = `
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+          ACTIVE ON-GOING
+        </span>
+      `;
+    } else {
+      const minutesRemaining = Math.ceil(Math.abs(msDiff) / 60000);
+      badgeHtml = `
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20">
+          SCHEDULED (In ~${minutesRemaining}m)
+        </span>
+      `;
+    }
+
+    let actionBtnHtml = '';
+    if (isLocalHost) {
+      actionBtnHtml = `
+        <button
+          onclick="deleteScheduledWorship('${w.id}')"
+          class="px-3.5 py-1.5 text-xs font-bold text-red-400 hover:text-red-300 border border-red-500/10 hover:border-red-500/30 bg-red-500/5 hover:bg-red-500/10 rounded-xl transition cursor-pointer flex items-center gap-1"
+          title="Delete this worship session (Ends sync for all clients)"
+        >
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          Delete / End
+        </button>
+      `;
+    } else {
+      if (activeFollowingWorshipId === w.id) {
+        actionBtnHtml = `
+          <button
+            class="px-4 py-1.5 text-xs font-black bg-emerald-500 text-neutral-950 rounded-xl transition-all flex items-center gap-1"
+            disabled
+          >
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            Following
+          </button>
+        `;
+      } else {
+        actionBtnHtml = `
+          <button
+            onclick="joinLiveWorship('${w.id}')"
+            class="px-4 py-1.5 text-xs font-bold bg-neutral-950 hover:bg-neutral-850 text-neutral-200 border border-neutral-800 hover:border-emerald-500/40 rounded-xl transition cursor-pointer flex items-center gap-1"
+          >
+            <i data-lucide="play-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+            Join Sync
+          </button>
+        `;
+      }
+    }
+
+    htmlStr += `
+      <div class="bg-neutral-950 border border-neutral-850 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="space-y-1.5 flex-1 min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h5 class="text-sm font-black text-neutral-100 truncate">${escapeHtml(w.title)}</h5>
+            ${badgeHtml}
+          </div>
+          <p class="text-xs text-neutral-400 font-semibold leading-relaxed">${escapeHtml(w.description)}</p>
+          <div class="flex flex-wrap items-center gap-3 text-[11px] text-neutral-500 font-medium mt-1">
+            <span class="flex items-center gap-1">
+              <i data-lucide="music" class="w-3 h-3 text-neutral-600"></i>
+              Track: <span class="text-neutral-400 font-bold">${escapeHtml(songName)}</span> • ${escapeHtml(artistName)}
+            </span>
+            <span>•</span>
+            <span class="flex items-center gap-1 font-mono">
+              <i data-lucide="clock" class="w-3 h-3 text-neutral-600"></i>
+              ${formattedStartTime}
+            </span>
+          </div>
+        </div>
+        <div class="shrink-0 self-end sm:self-center">
+          ${actionBtnHtml}
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = htmlStr;
+  if (window.lucide) window.lucide.createIcons();
+}
+
+async function deleteScheduledWorship(worshipId) {
+  if (!window.db || !window.fStore) return;
+  
+  const confirmed = await showConfirm(
+    "End Worship Session",
+    "Are you sure you want to delete this scheduled worship? This will disconnect all followers instantly.",
+    { confirmText: "End Session", isDanger: true }
+  );
+  if (!confirmed) return;
+
+  const docRef = window.fStore.doc(window.db, "scheduled_worships", worshipId);
+  try {
+    await window.fStore.deleteDoc(docRef);
+  } catch(e) {
+    console.error("Failed to delete scheduled worship:", e ? (e.message || String(e)) : "");
+    alert("Failed deleting: " + e.message);
+  }
+}
+
+function joinLiveWorship(worshipId) {
+  const session = scheduledWorshipsList.find(w => w.id === worshipId);
+  if (!session) return;
+
+  const song = databaseSongs.find(s => s.id === session.songId);
+  if (!song) {
+    alert("Worship track is not found in your local repository.");
+    return;
+  }
+
+  activeFollowingWorshipId = worshipId;
+
+  // Turn off previous sync audio loops
+  stopActiveWorshipFollowing();
+  activeFollowingWorshipId = worshipId; // Re-assign since teardown cleans it
+  
+  // Transition to prompter view
+  startPerformanceSession(song.id);
+
+  // Set top-header to "LIVE SYNCHRONIZED WORSHIP" with subtitle integration
+  const subtitleEl = document.getElementById('player-track-subtitle');
+  if (subtitleEl) {
+    subtitleEl.innerHTML = `<span class="text-emerald-400 font-black animate-pulse">● LIVE SYNCHRONIZED WORSHIP</span> • TRACK: ${song.title.toUpperCase()}`;
+  }
+
+  // Freeze interface buttons
+  lockPlayerControls();
+
+  // Close the popup window
+  closeLiveWorshipModal();
+
+  // Initialize frame-accurate continuous timeline tracker
+  clientWorshipSyncInterval = setInterval(tickLiveWorshipTemporalSync, 100);
+  tickLiveWorshipTemporalSync(); // run immediate tick to avoid jumpy load states
+}
+
+function tickLiveWorshipTemporalSync() {
+  if (!activeFollowingWorshipId) return;
+
+  const session = scheduledWorshipsList.find(w => w.id === activeFollowingWorshipId);
+  if (!session) return; // Unsubscribe/deleted handler handles removal safety
+
+  const song = databaseSongs.find(s => s.id === session.songId);
+  if (!song) return;
+
+  const elapsedSeconds = (Date.now() - session.startTime) / 1000;
+  playerCurrentTime = elapsedSeconds;
+
+  // Display labels
+  const currTimeLabel = document.getElementById('player-time-curr');
+  if (currTimeLabel) {
+    currTimeLabel.textContent = elapsedSeconds < 0 ? "-" + formatTimeOnly(Math.abs(elapsedSeconds)) : formatTimeOnly(elapsedSeconds);
+  }
+
+  const progressInput = document.getElementById('player-time-progress');
+  if (progressInput) {
+    progressInput.value = Math.max(0, elapsedSeconds);
+  }
+
+  const audioTag = document.getElementById('player-audio-source');
+
+  if (elapsedSeconds < 0) {
+    // Session is in standby
+    playerIsPlaying = false;
+    if (audioTag && !audioTag.paused) {
+      try { audioTag.pause(); } catch(e){}
+    }
+    stopProceduralSynthPad();
+
+    // Countdown details
+    const remaining = Math.ceil(Math.abs(elapsedSeconds));
+    const activeLabel = document.getElementById('prompt-row-active');
+    if (activeLabel) {
+      activeLabel.innerHTML = `Worship starts in <span class="font-mono text-emerald-400 font-black">${remaining}s</span>...<br><span class="text-xs text-neutral-500 font-semibold font-sans block mt-1.5">Prepare and open your spirit for praise</span>`;
+    }
+    const prevLabel = document.getElementById('prompt-row-prev');
+    if (prevLabel) prevLabel.textContent = "WORSHIP STANDBY";
+    const nextLabel = document.getElementById('prompt-row-next');
+    if (nextLabel) nextLabel.textContent = "UPCOMING TIMELINE MATCHING";
+    return;
+  }
+
+  // Active status play
+  playerIsPlaying = true;
+
+  if (song.audioUrl && audioTag) {
+    // Ensure media track aligns with planned timeline
+    if (Math.abs(audioTag.currentTime - elapsedSeconds) > 1.2) {
+      if (elapsedSeconds < audioTag.duration) {
+        audioTag.currentTime = elapsedSeconds;
+      }
+    }
+    if (audioTag.paused && elapsedSeconds < audioTag.duration) {
+      audioTag.play().catch(e => console.warn("Failed continuous audio playback sync:", e));
+    }
+  } else if (!song.audioUrl) {
+    // Pad Synth playback drone
+    if (synthOscs.length === 0) {
+      startProceduralSynthPad(song.tempo || 72);
+    }
+  }
+
+  // Determine active lyric index
+  let matchedIndex = -1;
+  let maxTimeFound = -1;
+  const lyrics = song.lyrics || [];
+  for (let i = 0; i < lyrics.length; i++) {
+    const t = lyrics[i].time;
+    if (t <= elapsedSeconds) {
+      if (t > maxTimeFound) {
+        maxTimeFound = t;
+        matchedIndex = i;
+      }
+    }
+  }
+
+  if (matchedIndex !== activePrompterIndex) {
+    activePrompterIndex = matchedIndex;
+    updatePrompterTextUI();
+  }
+}
+
+function stopActiveWorshipFollowing() {
+  if (clientWorshipSyncInterval) {
+    clearInterval(clientWorshipSyncInterval);
+    clientWorshipSyncInterval = null;
+  }
+  activeFollowingWorshipId = null;
+  
+  stopAllWorshipAudio();
+  stopProceduralSynthPad();
+  restorePlayerControls();
+}
+
+function lockPlayerControls() {
+  const rangeInput = document.getElementById('player-time-progress');
+  if (rangeInput) {
+    rangeInput.disabled = true;
+    rangeInput.style.pointerEvents = 'none';
+    rangeInput.style.opacity = '0.5';
+  }
+  const deck = document.getElementById('player-play-giant')?.parentElement;
+  if (deck) {
+    deck.style.pointerEvents = 'none';
+    deck.style.opacity = '0.4';
+  }
+  const speedBtnGroup = document.getElementById('btn-speed-10')?.parentElement;
+  if (speedBtnGroup) {
+    speedBtnGroup.style.pointerEvents = 'none';
+    speedBtnGroup.style.opacity = '0.4';
+  }
+}
+
+function restorePlayerControls() {
+  const rangeInput = document.getElementById('player-time-progress');
+  if (rangeInput) {
+    rangeInput.disabled = false;
+    rangeInput.style.pointerEvents = '';
+    rangeInput.style.opacity = '';
+  }
+  const deck = document.getElementById('player-play-giant')?.parentElement;
+  if (deck) {
+    deck.style.pointerEvents = '';
+    deck.style.opacity = '';
+  }
+  const speedBtnGroup = document.getElementById('btn-speed-10')?.parentElement;
+  if (speedBtnGroup) {
+    speedBtnGroup.style.pointerEvents = '';
+    speedBtnGroup.style.opacity = '';
+  }
+}
+
+async function testFirestoreConnection() {
+  if (window.db && window.fStore && window.fStore.getDoc) {
+    const testRef = window.fStore.doc(window.db, "system", "live_session");
+    try {
+      await window.fStore.getDoc(testRef);
+      console.log("Firestore connection test passed.");
+    } catch(err) {
+      console.warn("Firestore connection test failed: ", err ? (err.message || String(err)) : "");
+    }
+  }
+}
+
 // Expose all interactive functions explicitly to window scope to ensure HTML onclick events can always invoke them
+window.openLiveWorshipModal = openLiveWorshipModal;
+window.closeLiveWorshipModal = closeLiveWorshipModal;
+window.switchLiveTab = switchLiveTab;
+window.createNewScheduledWorship = createNewScheduledWorship;
+window.deleteScheduledWorship = deleteScheduledWorship;
+window.joinLiveWorship = joinLiveWorship;
+window.acknowledgeWorshipTerminated = acknowledgeWorshipTerminated;
+window.testFirestoreConnection = testFirestoreConnection;
 window.switchView = switchView;
 window.initNewSongWizard = initNewSongWizard;
 window.dismissDbErrorBanner = dismissDbErrorBanner;
@@ -2147,6 +2867,7 @@ window.loadSongIntoWizard = loadSongIntoWizard;
 window.startPerformanceSession = startPerformanceSession;
 window.downloadSongToCache = downloadSongToCache;
 window.showConfirm = showConfirm;
+window.showCustomConfirm = showConfirm;
 window.closeCustomConfirm = closeCustomConfirm;
 window.setWizardVolume = setWizardVolume;
 window.addNewWizardLine = addNewWizardLine;
@@ -2154,6 +2875,8 @@ window.updateWizardItemText = updateWizardItemText;
 window.deleteWizardLine = deleteWizardLine;
 window.seekWizardTrackTo = seekWizardTrackTo;
 window.handleWizardTimelineClick = handleWizardTimelineClick;
+window.insertMusicBreakShortcut = insertMusicBreakShortcut;
+window.cycleWizardMusicSpeed = cycleWizardMusicSpeed;
 
 function detectDeviceMode() {
   const isMobile = window.innerWidth <= 768;
