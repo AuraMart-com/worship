@@ -103,16 +103,17 @@
       to { transform: rotate(360deg); }
     }
     .loading-title {
-      color: #ffffff;
-      font-size: 24px;
-      font-weight: 850;
-      letter-spacing: -0.02em;
-      margin: 0 0 8px 0;
-      font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(to right, #ffffff, #34d399);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 850;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(to right, #ffffff, #34d399);
+    -webkit-background-clip: text; /* Keeps Webkit browsers happy */
+    background-clip: text;          /* Add this line: Keeps your editor happy */
+    -webkit-text-fill-color: transparent;
+}
     .loading-subtitle {
       color: #9ca3af;
       font-size: 13px;
@@ -198,6 +199,7 @@
       animation: pulseGlow 4s ease-in-out infinite;
       background: linear-gradient(to right, #34d399, #10b981, #6ee7b7);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
